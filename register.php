@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <title>Sign Up</title>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+        <link rel="icon" type="images/x-icon" href="images/title.ico" />
     </head>
     <body>
         <div class="container">
