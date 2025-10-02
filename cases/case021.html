@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width,initial-scale=1'>
+<title>Case 021 — Municipal Report</title>
+<link rel="stylesheet" href="/secret.css">
+<style>
+body{background:#0b0b0d;color:#eaeaea;font-family:Arial,Helvetica,sans-serif;padding:18px}
+.card{background:#111;padding:14px;border-radius:8px}
+.restricted-tag{color:#ffb4b4;font-weight:600}
+.hidden{display:none;background:#06060a;padding:10px;border-radius:6px;margin-top:12px}
+.log{font-family:monospace;background:#021010;color:#9ef08b;padding:8px;border-radius:6px;margin-top:12px}
+</style>
+</head>
+<body>
+<article class='card'>
+<h1>Case 021 — Municipal Report</h1>
+<div class='meta'>Handwritten note, partially smudged.</div>
+<div style='margin-top:12px;'>
+<p class='meta'>Handwritten note, partially smudged.</p><hr><p>Summary: This file contains notes and observations collected during an investigation of a local incident. Sections have been transcribed as-is.</p><p>Note in margin: "pass001" — possibly a tag or reference code.</p><p>Attached photograph: photo_01.jpg (see gallery)</p><p>Audio: faint whisper, timestamp 00:07</p>
+</div>
+<div style='margin-top:12px;'>
+<div style='margin-top:12px;'><div class='restricted-tag'>Access: Restricted. Credential required.</div></div>
+<div style='margin-top:12px;'>Enter credential: <input id='pw' placeholder='credential'><button id='ok'>Submit</button></div>
+<div id='hidden' class='hidden'><p><strong>CONFIDENTIAL:</strong> internal note: experiment reference: "KIN-021". This text is restricted.</p><p>Download: <a id='dl' href='#'>CONFIDENTIAL_SUMMARY.txt</a></p></div>
+</div>
+<div class='log' id='log'>[INFO] Document opened.</div>
+<div style='margin-top:12px'><a href='/index.html'>Back to site</a> • <a href='/cases_index.html'>All cases index</a></div>
+</article>
+<script>
+(function(){
+  var pwd = "pass001";
+  var log = document.getElementById('log');
+  function append(msg){ log.innerText += '\n'+msg; }
+  document.getElementById('ok').addEventListener('click', function(){ var v=document.getElementById('pw').value.trim(); if(!v){append('[WARN] No credential entered.');return;} if(v===pwd){document.getElementById('hidden').style.display='block';append('[OK] Credential accepted.'); try{ markCaseUnlocked('case021'); }catch(e){}; // injected'); var blob=new Blob([`CONFIDENTIAL SUMMARY\n\nCase 021 — Municipal Report\n\nThis file was unlocked with credential: pass001`],{type:'text/plain'}); var url=URL.createObjectURL(blob); document.getElementById('dl').href=url; document.getElementById('dl').download='CONFIDENTIAL_case021.txt'; } else if(["pass001", "as1nomi", "s3c437", "die", "life", "error", "myfault"].indexOf(v.toLowerCase())!==-1){append('[NOTICE] Credential recognized but not authorized for this document.');} else {append('[ERROR] Credential rejected.');}});
+})();
+</script>
+<script src='/cases_common.js'></script>
+</body>
+</html>
