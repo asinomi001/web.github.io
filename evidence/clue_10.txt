@@ -1,2 +1,0 @@
-Fragment 10: Found notation referencing 'die'.
-May be catalog tag.

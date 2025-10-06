@@ -1,2 +1,0 @@
-Fragment 5: Found notation referencing 'error'.
-May be catalog tag.

@@ -1,2 +1,0 @@
-Fragment 20: Found notation referencing 'as1nomi'.
-May be catalog tag.
