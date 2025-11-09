@@ -11,5 +11,55 @@
     <h3>Yes, you got here, but how? From where?</h3>
     <h3>This question is strange, but dou know all passwords ant etc?</h3>
     <h3>No? Then okay... (It would be better to look for them on the pages...) Then you're unlikely to get here.</h3>
+     <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f2f2f2;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        input[type="password"] {
+            padding: 10px;
+            margin-right: 10px;
+        }
+        #message {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <input type="password" id="password" placeholder="Password">
+    <button onclick="checkPassword()">Check</button>
+    <div id="message"></div>
+</div>
+
+<script>
+    const correctPassword = "secret";
+    const redirectUrl = "https://asinomi001.github.io/web.github.io/pages/1.html/";
+
+    function checkPassword() {
+        const enteredPassword = document.getElementById("password").value;
+        const messageDiv = document.getElementById("message");
+
+        if (enteredPassword === correctPassword) {
+            messageDiv.style.color = "green";
+            messageDiv.textContent = "Password is correct!)";
+        } else {
+            messageDiv.style.color = "red";
+            messageDiv.textContent = "Password is not correct!";
+        }
+    }
+</script>
 </body>
 </html>
