@@ -3,13 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="images/x-icon" href="images/title.ico" />
-    <title>am I alive?(@!!!</title>
+    <title>Password Check</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background-color: #f0f0f0;
+        }
+        .container {
+            display: inline-block;
+            padding: 30px 40px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        input[type="password"] {
+            padding: 10px;
+            width: 70%;
+            margin-bottom: 15px;
+        }
+        button {
+            padding: 10px 20px;
+            cursor: pointer;
+        }
+        #message {
+            margin-top: 15px;
+            font-weight: bold;
+        }
+        #message.success {
+            color: green;
+        }
+        #message.error {
+            color: red;
+        }
+    </style>
 </head>
 <body>
-    <center><h1>How?</h1></center>
-    <h3>Yes, you got here, but how? From where?</h3>
-    <h3>This question is strange, but dou know all passwords ant etc?</h3>
-    <h3>No? Then okay... (It would be better to look for them on the pages...) Then you're unlikely to get here.</h3>
+
+<div class="container">
+    <h2>Enter the password</h2>
+    <input type="password" id="password" placeholder="Password">
+    <br>
+    <button id="submitBtn">Submit</button>
+    <div id="message"></div>
+
+    <!-- Table with passwords and URLs -->
+    <table id="passwordTable" style="display:none;">
+        <tr data-password="secret" data-url="https://asinomi001.github.io/web.github.io/pages/secret.html"></tr>
+        <tr data-password="001" data-url="https://asinomi001.github.io/web.github.io/pages/001.html"></tr>
+        <tr data-password="admin" data-url="https://asinomi001.github.io/web.github.io/pages/admin.html"></tr>
+        <tr data-password="agusha" data-url="https://asinomi001.github.io/web.github.io/pages/agusha.html"></tr>
+        <tr data-password="???" data-url="https://asinomi001.github.io/web.github.io/pages/unknown.html"></tr>
+    </table>
+</div>
+
+<script>
+    function checkPassword() {
+        const enteredPassword = document.getElementById("password").value;
+        const messageDiv = document.getElementById("message");
+        const rows = document.querySelectorAll("#passwordTable tr");
+        let found = false;
+
+        rows.forEach(row => {
+            const pwd = row.getAttribute("data-password");
+            const url = row.getAttribute("data-url");
+            if (enteredPassword === pwd) {
+                found = true;
+                messageDiv.textContent = "Success! Redirecting...";
+                messageDiv.className = "success";
+                setTimeout(() => {
+                    window.location.href = url;
+                }, 2000);
+            }
+        });
+
+        if (!found) {
+            messageDiv.textContent = "Incorrect password!";
+            messageDiv.className = "error";
+        }
+    }
+
+    // Enable Enter key for password input
+    const passwordInput = document.getElementById("password");
+    const submitBtn = document.getElementById("submitBtn");
+
+    passwordInput.addEventListener("keyup", function(event) {
+        if (event.key === "Enter") {
+            submitBtn.click();
+        }
+    });
+</script>
+
 </body>
 </html>
