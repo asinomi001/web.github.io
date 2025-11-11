@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Group</title></head>
+<body style="font-family:Arial;padding:12px;">
+<script>
+const me = JSON.parse(localStorage.getItem('logged_user')); if(!me){ alert('login'); location.href='login.html'; }
+let groups = JSON.parse(localStorage.getItem('groups')||'[]');
+const gid = Number(localStorage.getItem('current_group'));
+let group = groups.find(g=>g.id===gid);
+if(!group){ alert('No group'); location.href='groups.html'; }
+</script>
+<h2 id="gname"></h2>
+<img id="gavatar" width="100" style="border-radius:50%"><p id="gdesc"></p>
+<div id="chat" style="height:300px;overflow:auto;border:1px solid #ddd;padding:8px;background:white"></div>
+<input id="gmsg" placeholder="Message"><button onclick="send()">Send</button>
+<input id="gfile" type="file">
+<button onclick="invite()">Invite by username</button>
+<script>
+gname.textContent = group.name; gavatar.src = group.avatar; gdesc.textContent = group.desc;
+function render(){ chat.innerHTML=''; (group.messages||[]).forEach(m=>{
+  const d=document.createElement('div'); d.style.padding='6px'; if(typeof m === 'string') d.textContent = m; else d.textContent = m.from+': '+m.text; chat.appendChild(d);
+ }); chat.scrollTop = chat.scrollHeight; }
+function send(){
+ const text = gmsg.value.trim(); if(!text) return;
+ group.messages = group.messages || []; group.messages.push({from:me.username, text, time:Date.now()});
+ save();
+ gmsg.value='';
+ render();
+}
+gfile.onchange = e=>{
+ const f = e.target.files[0]; if(!f) return;
+ const r = new FileReader(); r.onload=ev=>{ group.messages.push({from:me.username, text:f.name, file:ev.target.result, mime:f.type}); save(); render(); }; r.readAsDataURL(f);
+};
+
+function invite(){
+ const name = prompt('Enter username to invite'); if(!name) return;
+ const users = JSON.parse(localStorage.getItem('my_users')||'[]');
+ const u = users.find(x=>x.username===name); if(!u) return alert('user not found');
+ if(!group.members.includes(u.id)) group.members.push(u.id);
+ save(); alert('Invited');
+}
+
+function save(){ groups = JSON.parse(localStorage.getItem('groups')||'[]'); const i=groups.findIndex(g=>g.id===group.id); if(i>-1) groups[i]=group; else groups.push(group); localStorage.setItem('groups', JSON.stringify(groups)); }
+render();
+</script>
+</body></html>

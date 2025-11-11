@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Admin</title></head>
+<body style="font-family:Arial;padding:20px;">
+<h2>Admin login</h2>
+<form id="adm">
+ <input id="alog" placeholder="login"><br>
+ <input id="apass" placeholder="password" type="password"><br>
+ <button type="submit">Enter</button>
+</form>
+<script>
+adm.onsubmit = e=>{
+ e.preventDefault();
+ if(alog.value==='as1owner' && apass.value==='where1am'){ localStorage.setItem('admin_logged','1'); location.href='admin_panel.html'; }
+ else alert('Wrong admin credentials');
+};
+</script>
+</body></html>

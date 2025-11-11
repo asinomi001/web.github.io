@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Groups & Channels</title></head>
+<body style="font-family:Arial;padding:16px;">
+<script>
+const me = JSON.parse(localStorage.getItem('logged_user'));
+if(!me){ alert('Login required'); location.href='login.html'; }
+let groups = JSON.parse(localStorage.getItem('groups')||'[]');
+function render(){
+ const box = document.getElementById('box'); box.innerHTML='';
+ if(groups.length===0) box.innerHTML='<p>No groups yet</p>';
+ groups.forEach(g=>{
+   const d=document.createElement('div'); d.style.padding='8px;border:1px solid #ddd;margin:6px;border-radius:8px';
+   d.innerHTML = `<img src="${g.avatar}" width=50 style="border-radius:50%;vertical-align:middle"> <b>${g.name}</b> <small>@${g.username}</small>
+   <div>${g.desc||''}</div>
+   <button onclick="openGroup(${g.id})">Open</button>`;
+   box.appendChild(d);
+ });
+}
+function openGroup(id){ localStorage.setItem('current_group', id); location.href='group_page.html'; }
+render();
+</script>
+<h2>Groups & Channels</h2>
+<div id="box"></div>
+<a href="create_group.html"><button>Create Group/Channel</button></a>
+</body></html>

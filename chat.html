@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>Chat</title></head>
+<body style="font-family:Arial;padding:12px;">
+<script>
+const me = JSON.parse(localStorage.getItem('logged_user'));
+if(!me){ alert('Login required'); location.href='login.html'; }
+const current = JSON.parse(localStorage.getItem('current_chat')||'null');
+if(!current){ alert('No chat selected'); location.href='friends.html'; }
+let chats = JSON.parse(localStorage.getItem('my_chats')||'[]');
+let users = JSON.parse(localStorage.getItem('my_users')||'[]');
+let chatObj;
+if(current.type==='private'){
+  const otherId = current.with;
+  chatObj = chats.find(ch=>ch.type==='private' && ch.members.includes(me.id) && ch.members.includes(otherId));
+  if(!chatObj){ chatObj = {id:Date.now(),type:'private',members:[me.id,otherId],messages:[]}; chats.push(chatObj); localStorage.setItem('my_chats',JSON.stringify(chats)); }
+  const other = users.find(u=>u.id===otherId);
+  document.title = 'Chat with '+other.username;
+}else if(current.type==='saved'){
+  chatObj = chats.find(ch=>ch.type==='saved' && ch.owner===current.owner);
+  if(!chatObj){ chatObj={id:Date.now(),type:'saved',owner:current.owner,members:[current.owner],messages:[]}; chats.push(chatObj); localStorage.setItem('my_chats',JSON.stringify(chats)); }
+  document.title = 'Saved Messages';
+}else if(current.type==='group'){
+  chatObj = JSON.parse(localStorage.getItem('groups')||'[]').find(g=>g.id==current.groupId);
+  if(!chatObj){ alert('Group not found'); location.href='groups.html'; }
+  document.title = 'Group: '+chatObj.name;
+}
+</script>
+
+<h2 id="header"></h2>
+<div id="messages" style="height:50vh;overflow:auto;border:1px solid #ccc;padding:8px;background:white"></div>
+
+<div style="margin-top:8px;">
+  <input id="text" placeholder="Message" style="width:60%;padding:8px">
+  <button onclick="sendText()">Send</button>
+  <input type="file" id="file" accept="image/*,video/*,application/pdf" style="display:inline-block">
+  <button id="recordVoice">Record Voice</button>
+  <button id="recordVideo">Record Video</button>
+  <button onclick="saveToSaved()">Save selected to Saved Messages</button>
+</div>
+
+<script>
+function refreshHeader(){
+  if(current.type==='private'){
+    const other = users.find(u=>u.id===current.with);
+    header.textContent = 'Chat with '+ other.username;
+  } else if(current.type==='saved') header.textContent = 'Saved Messages';
+  else header.textContent = 'Group: '+chatObj.name;
+}
+refreshHeader();
+
+function render(){
+  messages.innerHTML='';
+  const arr = chatObj.messages || [];
+  arr.forEach((m, idx)=>{
+    const div = document.createElement('div');
+    div.style.margin='6px 0';
+    div.dataset.idx = idx;
+    if(m.type==='text') div.innerHTML = `<b>${m.from}:</b> ${m.text}`;
+    else if(m.type==='file') {
+      const isImg = m.mime && m.mime.startsWith('image');
+      if(isImg) div.innerHTML = `<b>${m.from}:</b><br><img src="${m.data}" style="max-width:300px;border-radius:6px"><div><a download="${m.name}" href="${m.data}">Download</a></div>`;
+      else if(m.mime && m.mime.startsWith('video')) div.innerHTML = `<b>${m.from}:</b><br><video controls src="${m.data}" style="max-width:300px"></video>`;
+      else div.innerHTML = `<b>${m.from}:</b><div><a download="${m.name}" href="${m.data}">${m.name}</a></div>`;
+    } else if(m.type==='voice') div.innerHTML = `<b>${m.from}:</b><div><audio controls src="${m.data}"></audio></div>`;
+    else if(m.type==='video_note') div.innerHTML = `<b>${m.from}:</b><div><video controls src="${m.data}" style="max-width:300px"></video></div>`;
+    messages.appendChild(div);
+  });
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function saveChats(){
+  // update chats / groups in storage
+  if(current.type==='group'){
+    let groups = JSON.parse(localStorage.getItem('groups')||'[]');
+    const idx = groups.findIndex(g=>g.id==chatObj.id);
+    if(idx>-1){ groups[idx] = chatObj; localStorage.setItem('groups', JSON.stringify(groups)); }
+  } else {
+    let all = JSON.parse(localStorage.getItem('my_chats')||'[]');
+    const idx = all.findIndex(ch=>ch.id==chatObj.id);
+    if(idx>-1) all[idx] = chatObj;
+    else all.push(chatObj);
+    localStorage.setItem('my_chats', JSON.stringify(all));
+  }
+}
+
+function sendText(){
+  const txt = document.getElementById('text').value.trim();
+  if(!txt) return;
+  const o = {from: me.username, type:'text', text: txt, time: Date.now()};
+  chatObj.messages = chatObj.messages || []; chatObj.messages.push(o);
+  saveChats(); document.getElementById('text').value=''; render();
+}
+
+document.getElementById('file').addEventListener('change', e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const reader = new FileReader();
+  reader.onload = ev=>{
+    const dataUrl = ev.target.result;
+    const o = {from:me.username, type:'file', name:f.name, mime:f.type, data:dataUrl, time:Date.now()};
+    chatObj.messages.push(o); saveChats(); render();
+  };
+  reader.readAsDataURL(f);
+});
+
+let mediaRecorder, chunks=[];
+document.getElementById('recordVoice').onclick = async ()=>{
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({audio:true});
+    mediaRecorder = new MediaRecorder(stream);
+    chunks = [];
+    mediaRecorder.ondataavailable = e=>chunks.push(e.data);
+    mediaRecorder.onstop = async ()=>{
+      const blob = new Blob(chunks,{type:'audio/webm'});
+      const reader = new FileReader();
+      reader.onload = ev=>{
+        chatObj.messages.push({from:me.username, type:'voice', data:ev.target.result, time:Date.now()});
+        saveChats(); render();
+      };
+      reader.readAsDataURL(blob);
+    };
+    mediaRecorder.start();
+    alert('Recording voice note — click OK to stop');
+    setTimeout(()=>{ if(mediaRecorder && mediaRecorder.state==='recording') mediaRecorder.stop(); }, 5000);
+  }catch(err){ alert('Microphone access denied'); }
+};
+
+document.getElementById('recordVideo').onclick = async ()=>{
+  try{
+    const stream = await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+    mediaRecorder = new MediaRecorder(stream);
+    chunks = [];
+    mediaRecorder.ondataavailable = e=>chunks.push(e.data);
+    mediaRecorder.onstop = ()=>{
+      const blob = new Blob(chunks,{type:'video/webm'});
+      const reader = new FileReader();
+      reader.onload = ev=>{
+        chatObj.messages.push({from:me.username, type:'video_note', data:ev.target.result, time:Date.now()});
+        saveChats(); render();
+      };
+      reader.readAsDataURL(blob);
+    };
+    mediaRecorder.start();
+    alert('Recording video note — click OK to stop');
+    setTimeout(()=>{ if(mediaRecorder && mediaRecorder.state==='recording') mediaRecorder.stop(); }, 5000);
+  }catch(err){ alert('Camera access denied'); }
+};
+
+function saveToSaved(){
+  // copy last message to saved messages chat for me
+  const last = chatObj.messages[chatObj.messages.length-1];
+  if(!last) return alert('No message to save');
+  let all = JSON.parse(localStorage.getItem('my_chats')||'[]');
+  let saved = all.find(c=>c.type==='saved' && c.owner===me.id);
+  if(!saved){ saved = {id:Date.now(), type:'saved', owner:me.id, members:[me.id], messages:[]}; all.push(saved); }
+  saved.messages.push(last);
+  localStorage.setItem('my_chats', JSON.stringify(all));
+  alert('Saved to Saved Messages');
+}
+
+render();
+</script>
+</body></html>

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Login</title></head>
+<body style="font-family:Arial;padding:24px;">
+<script>
+if(localStorage.getItem('logged_user')){ alert('Already logged in'); location.href='index.html'; }
+</script>
+
+<h2>Login</h2>
+<form id="f">
+  <div><label>Username:</label><br><input id="u" required></div>
+  <div><label>Password:</label><br><input id="p" type="password" required></div>
+  <div style="margin-top:10px;"><button type="submit">Login</button></div>
+</form>
+
+<script>
+f.onsubmit = e=>{
+  e.preventDefault();
+  const users = JSON.parse(localStorage.getItem('my_users')||'[]');
+  const user = users.find(x=>x.username===u.value && x.password===p.value);
+  if(!user){ alert('Wrong username or password'); return; }
+  localStorage.setItem('logged_user', JSON.stringify(user));
+  alert('Logged in');
+  location.href='friends.html';
+};
+</script>
+</body></html>

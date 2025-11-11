@@ -1,97 +1,42 @@
 <!DOCTYPE html>
 <html>
 <head>
+<meta charset="utf-8">
 <title>Asinomi WebSite</title>
 <link rel="icon" type="images/x-icon" href="images/title.ico" />
 <style>
-/* Стили для аватарки в правом верхнем углу */
-.avatar-container {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  z-index: 1000;
-}
-
-#userAvatar {
-  width:50px;
-  height:50px;
-  border-radius:50%;
-  object-fit:cover;
-  cursor:pointer;
-  border:2px solid #2b7cff;
-  display:none; /* по умолчанию скрыта */
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-#userAvatar:hover {
-  transform: scale(1.2);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-/* Tooltip */
-#avatarTooltip {
-  position: absolute;
-  bottom: 60px;
-  right: 0;
-  background: rgba(0,0,0,0.8);
-  color: #fff;
-  padding: 4px 8px;
-  border-radius: 6px;
-  font-size: 12px;
-  white-space: nowrap;
-  display: none;
-  pointer-events: none;
-}
+  body{font-family:Arial,Helvetica,sans-serif;background:#f3f6fb;margin:0;padding:40px;text-align:center;}
+  h1{font-family:"Comic Sans MS",sans-serif;}
+  .btn{padding:10px 18px;border-radius:8px;border:0;background:#2b7cff;color:white;margin:8px;cursor:pointer;}
+  .avatar-container{position:fixed;top:10px;right:10px}
+  #userAvatar{width:48px;height:48px;border-radius:50%;border:2px solid #2b7cff;display:none;cursor:pointer}
 </style>
 </head>
 <body>
+  <div class="avatar-container">
+    <img id="userAvatar" alt="avatar" title="Account">
+  </div>
 
-<!-- Аватарка пользователя с tooltip -->
-<div class="avatar-container">
-  <img id="userAvatar" alt="User Avatar">
-  <div id="avatarTooltip"></div>
-</div>
+  <h1>Hi, I'm Asinomi♥🏡</h1>
+  <div>
+    <button class="btn" onclick="location.href='friends.html'">TAP!</button>
+    <button class="btn" onclick="location.href='groups.html'">Groups/Channels</button>
+  </div>
 
-<font face="comic sans ms"><center><h1>Hi, I'm Asinomi♥🏡</h1></center></font>
-<center><button>TAP!</button></center>
-<center><a href="images.html" ><button>My Images🖼🖼</button></a></center>
-<center><a href="about me.html" ><button>About ME!(dev)</button></a></center>
-<div class="div1">
-<center><a href="RegPAge.html" ><button>REGISTER</button></a></center>
-<center><a href="rules.html" ><button class="rules" >Read <strong>RULES📖</strong></button></a></center>
-</div>
-<div class="rules">
-<img src="images/asinomi dev.png" alt="" width="500" height="500" title="Dev Art" />
-</div>
-<div class="secret">
-<span style="color: white">find secret</span></font>
-</div>
+  <div style="margin-top:20px;">
+    <button class="btn" onclick="location.href='signup.html'">Register</button>
+    <button class="btn" onclick="location.href='login.html'">Login</button>
+    <button class="btn" onclick="location.href='admin.html'">Admin</button>
+  </div>
 
 <script>
-// Получаем залогиненного пользователя
-const currentUser = JSON.parse(localStorage.getItem('logged_user'));
 const avatarImg = document.getElementById('userAvatar');
-const tooltip = document.getElementById('avatarTooltip');
-
-if(currentUser && currentUser.avatar){
-  avatarImg.src = currentUser.avatar;
-  avatarImg.style.display = 'block'; // показываем аватар
-  tooltip.textContent = currentUser.username; // имя пользователя для tooltip
-
-  // клик по аватарке → переход на account.html
-  avatarImg.addEventListener('click', () => {
-    window.location.href = 'account.html';
-  });
-
-  // показать tooltip при наведении
-  avatarImg.addEventListener('mouseenter', () => {
-    tooltip.style.display = 'block';
-  });
-  avatarImg.addEventListener('mouseleave', () => {
-    tooltip.style.display = 'none';
-  });
+const logged = JSON.parse(localStorage.getItem('logged_user'));
+if(logged && logged.avatar){
+  avatarImg.src = logged.avatar;
+  avatarImg.style.display = 'inline-block';
+  avatarImg.onclick = ()=> location.href='account.html';
 }
 </script>
-
 </body>
 </html>

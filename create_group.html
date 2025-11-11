@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Create Group</title></head>
+<body style="font-family:Arial;padding:16px;">
+<script>const me=JSON.parse(localStorage.getItem('logged_user')); if(!me){alert('login');location.href='login.html'}</script>
+<h2>Create Group/Channel</h2>
+<div><input id="gname" placeholder="Name"></div>
+<div><input id="gusername" placeholder="Username"></div>
+<div><textarea id="gdesc" placeholder="Description"></textarea></div>
+<div><input type="file" id="gavatar"></div>
+<button onclick="create()">Create</button>
+<script>
+function create(){
+ const name = document.getElementById('gname').value.trim();
+ const username = document.getElementById('gusername').value.trim();
+ const desc = document.getElementById('gdesc').value.trim();
+ if(!name||!username) return alert('fill fields');
+ const f = document.getElementById('gavatar').files[0];
+ const id = Date.now();
+ function pushGroup(avatarSrc){
+   const groups = JSON.parse(localStorage.getItem('groups')||'[]');
+   groups.push({id, name, username, desc, avatar: avatarSrc||'images/default_group.png', members:[me.id], messages:[]});
+   localStorage.setItem('groups', JSON.stringify(groups));
+   alert('Created'); location.href='groups.html';
+ }
+ if(f){
+   const r=new FileReader(); r.onload=ev=>pushGroup(ev.target.result); r.readAsDataURL(f);
+ } else pushGroup();
+}
+</script>
+</body></html>

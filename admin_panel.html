@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>Admin Panel</title></head>
+<body style="font-family:Arial;padding:14px;">
+<script>
+if(!localStorage.getItem('admin_logged')){ alert('Admin login required'); location.href='admin.html'; }
+</script>
+<h2>Admin Panel — Users</h2>
+<div id="controls">
+ <button onclick="refresh()">Refresh</button>
+ <button onclick="logoutAdmin()" style="background:#e74c3c;color:white">Logout admin</button>
+</div>
+<table id="tbl" border="1" cellpadding="6" style="width:100%;margin-top:8px;">
+ <thead><tr><th>ID</th><th>Username</th><th>Name</th><th>Password</th><th>Avatar</th><th>Actions</th></tr></thead>
+ <tbody></tbody>
+</table>
+<script>
+function refresh(){
+ const users = JSON.parse(localStorage.getItem('my_users')||'[]');
+ const tbody = document.querySelector('#tbl tbody'); tbody.innerHTML='';
+ users.forEach((u, i)=>{
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${u.id}</td>
+    <td><input id="un${i}" value="${u.username}"></td>
+    <td><input id="nm${i}" value="${u.name}"></td>
+    <td><input id="pw${i}" value="${u.password}"></td>
+    <td><img src="${u.avatar||'images/avatar1.png'}" width=40 style="border-radius:50%"></td>
+    <td>
+      <button onclick="save(${i})">Save</button>
+      <button onclick="del(${i})" style="background:#e74c3c;color:white">Delete</button>
+    </td>`;
+  tbody.appendChild(tr);
+ });
+}
+function save(i){
+ const users = JSON.parse(localStorage.getItem('my_users')||'[]');
+ users[i].username = document.getElementById('un'+i).value;
+ users[i].name = document.getElementById('nm'+i).value;
+ users[i].password = document.getElementById('pw'+i).value;
+ localStorage.setItem('my_users', JSON.stringify(users));
+ alert('Saved');
+}
+function del(i){
+ if(!confirm('Delete user?')) return;
+ const users = JSON.parse(localStorage.getItem('my_users')||'[]');
+ users.splice(i,1);
+ localStorage.setItem('my_users', JSON.stringify(users));
+ refresh();
+}
+function logoutAdmin(){ localStorage.removeItem('admin_logged'); alert('Admin logged out'); location.href='admin.html'; }
+refresh();
+</script>
+</body></html>
