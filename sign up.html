@@ -1,91 +1,117 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html>
 <head>
-<meta charset="UTF-8">
 <title>Sign Up</title>
-<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<link rel="icon" type="images/x-icon" href="images/title.ico" />
 <style>
-body{font-family:Arial; background:#eef; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:40px;}
-h1{margin-bottom:20px;}
-form{background:#fff; padding:20px; margin:10px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); width:300px;}
-input{width:100%; padding:8px; margin:6px 0; border-radius:6px; border:1px solid #ccc;}
-button{width:100%; padding:10px; margin-top:10px; border:none; border-radius:6px; background:#2b7cff; color:#fff; cursor:pointer;}
-#msg{margin-top:10px; font-weight:bold;}
+body { font-family: Arial, sans-serif; background: #eef; display:flex; justify-content:center; padding-top:40px; }
+form { background:#fff; padding:20px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); width:350px; }
+input { width:100%; padding:8px; margin:6px 0; border-radius:6px; border:1px solid #ccc; }
+button { width:100%; padding:10px; margin-top:10px; border:none; border-radius:6px; background:#2b7cff; color:#fff; cursor:pointer; }
+.avatar-choice { display:flex; gap:10px; margin:10px 0; flex-wrap: wrap; }
+.avatar-choice img { width:60px; height:60px; border-radius:50%; border:2px solid transparent; cursor:pointer; transition: transform 0.2s, border 0.2s; }
+.avatar-choice img:hover { transform: scale(1.1); border:2px solid #2b7cff; }
+.selected { border:2px solid #2b7cff; }
+#preview-container { display:flex; align-items:center; gap:10px; margin-top:10px; }
+#preview { width:60px; height:60px; border-radius:50%; border:2px solid #2b7cff; object-fit:cover; display:none; }
 </style>
 </head>
 <body>
 
-<h1>SIGN UP (Create your account)</h1>
-
 <form id="signupForm">
+  <h2>Create Your Account</h2>
+  
   <label>Login</label>
-  <input type="text" id="signupUsername" placeholder="Username">
+  <input type="text" name="login" required>
 
   <label>E-mail</label>
-  <input type="email" id="signupEmail" placeholder="Your email">
+  <input type="email" name="email" required>
 
   <label>Password</label>
-  <input type="password" id="signupPassword" placeholder="Password">
+  <input type="password" name="password" required>
+
+  <label>Select Avatar</label>
+  <div class="avatar-choice" id="avatarChoice">
+    <img src="images/avatars/avatar1.png" alt="Avatar1">
+    <img src="images/avatars/avatar2.png" alt="Avatar2">
+    <img src="images/avatars/avatar3.png" alt="Avatar3">
+    <img src="images/avatars/avatar4.png" alt="Avatar4">
+  </div>
+
+  <label>Or Upload Your Own Avatar</label>
+  <input type="file" id="customAvatar" accept="image/*">
   
-  <button type="button" id="registerBtn">Register</button>
+  <div id="preview-container">
+    <span>Preview:</span>
+    <img id="preview" alt="Avatar Preview">
+  </div>
+
+  <button type="submit">Register</button>
 </form>
 
-<div id="msg"></div>
-
 <script>
-// Инициализация EmailJS
-emailjs.init('NOcffBGQRrq0LZ-zJ'); // Public Key
+let selectedAvatar = "";
 
-const msg = document.getElementById('msg');
-const USERS_KEY = 'my_users'; // ключ для localStorage
+// выбор готового аватара
+document.querySelectorAll('#avatarChoice img').forEach(img => {
+  img.addEventListener('click', () => {
+    selectedAvatar = img.src;
+    document.querySelectorAll('#avatarChoice img').forEach(i => i.classList.remove('selected'));
+    img.classList.add('selected');
+    // скрываем превью кастомного аватара
+    document.getElementById('preview').style.display = 'none';
+  });
+});
 
-function getUsers() {
-  return JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
-}
+// загрузка кастомного аватара
+document.getElementById('customAvatar').addEventListener('change', function(){
+  const file = this.files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = function(e){
+      selectedAvatar = e.target.result;
+      const preview = document.getElementById('preview');
+      preview.src = selectedAvatar;
+      preview.style.display = 'block';
+      // снимаем выделение с готовых аватарок
+      document.querySelectorAll('#avatarChoice img').forEach(i => i.classList.remove('selected'));
+    }
+    reader.readAsDataURL(file);
+  }
+});
 
-function saveUser(user) {
-  const users = getUsers();
-  users.push(user);
-  localStorage.setItem(USERS_KEY, JSON.stringify(users));
-}
+// регистрация
+document.getElementById('signupForm').addEventListener('submit', function(e){
+  e.preventDefault();
+  const login = this.login.value.trim();
+  const email = this.email.value.trim();
+  const password = this.password.value.trim();
 
-document.getElementById('registerBtn').addEventListener('click', async () => {
-  const username = document.getElementById('signupUsername').value.trim();
-  const password = document.getElementById('signupPassword').value.trim();
-  const email = document.getElementById('signupEmail').value.trim();
-  
-  if(!username || !password || !email){
-    msg.style.color='red';
-    msg.textContent='Please fill all fields';
+  if(!login || !email || !password){
+    alert("Fill all fields");
     return;
   }
 
-  const users = getUsers();
-  if(users.find(u => u.username === username)){
-    msg.style.color='red';
-    msg.textContent='Username already exists';
+  let users = JSON.parse(localStorage.getItem('my_users') || '[]');
+
+  if(users.find(u=>u.email===email)){
+    alert("User with this email already exists!");
     return;
   }
 
-  // сохраняем аккаунт
-  saveUser({username, password, email});
-  msg.style.color='green';
-  msg.textContent='Registered successfully!';
-
-  // отправка письма через EmailJS
-  const templateParams = {
-    to_email: email,
-    subject: 'Welcome!',
-    message: `Hello ${username}, your account has been created!`
+  const newUser = {
+    username: login,
+    email: email,
+    password: password,
+    avatar: selectedAvatar || ""
   };
 
-  try {
-    await emailjs.send('as1nomi_t0k3n','template_as1',templateParams);
-  } catch(err) {
-    console.log('EmailJS error:', err);
-  }
+  users.push(newUser);
+  localStorage.setItem('my_users', JSON.stringify(users));
+  localStorage.setItem('logged_user', JSON.stringify(newUser)); // сразу залогинить
 
-  setTimeout(()=>{ window.location.href = 'login.html'; }, 1500);
+  alert("Account created successfully!");
+  window.location.href = 'account.html'; // переходим на страницу аккаунта
 });
 </script>
 
