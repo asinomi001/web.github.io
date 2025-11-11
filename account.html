@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Account Management</title>
+<style>
+body{font-family:Arial; background:#eef; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding-top:40px;}
+h1{margin-bottom:20px;}
+form{background:#fff; padding:20px; margin:10px; border-radius:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); width:350px;}
+input{width:100%; padding:8px; margin:6px 0; border-radius:6px; border:1px solid #ccc;}
+button{width:100%; padding:10px; margin-top:10px; border:none; border-radius:6px; background:#2b7cff; color:#fff; cursor:pointer;}
+#logoutBtn{background:#ff4c4c; margin-top:20px;}
+#avatarImg, #avatarPreview{width:100px; height:100px; border-radius:50%; object-fit:cover; margin-bottom:10px; border:2px solid #ccc;}
+#msg{margin-top:10px; font-weight:bold;}
+</style>
+</head>
+<body>
+
+<h1>Manage Your Account</h1>
+
+<div>
+  <img id="avatarImg" src="" alt="Avatar">
+  <p><strong>Email:</strong> <span id="userEmail"></span></p>
+</div>
+
+<form id="changeAvatarForm">
+  <label>Change Avatar</label>
+  <input type="file" id="avatarInput" accept="image/*">
+  <img id="avatarPreview" src="" alt="Preview" style="display:none;">
+  <button type="button" id="changeAvatarBtn">Save Avatar</button>
+</form>
+
+<form id="changeUsernameForm">
+  <label>New Username</label>
+  <input type="text" id="newUsername" placeholder="Enter new username">
+  <button type="button" id="changeUsernameBtn">Change Username</button>
+</form>
+
+<form id="changePasswordForm">
+  <label>New Password</label>
+  <input type="password" id="newPassword" placeholder="Enter new password">
+  <button type="button" id="changePasswordBtn">Change Password</button>
+</form>
+
+<button id="logoutBtn">Log Out</button>
+
+<div id="msg"></div>
+
+<script>
+const USERS_KEY = 'my_users';
+const LOGGED_USER_KEY = 'logged_user';
+const msg = document.getElementById('msg');
+const avatarImg = document.getElementById('avatarImg');
+const avatarPreview = document.getElementById('avatarPreview');
+
+// Проверка текущего пользователя
+let currentUser = JSON.parse(localStorage.getItem(LOGGED_USER_KEY));
+if(!currentUser){
+  alert('You are not logged in!');
+  window.location.href = 'login.html';
+}
+
+// показать email и аватар
+document.getElementById('userEmail').textContent = currentUser.email;
+if(currentUser.avatar) avatarImg.src = currentUser.avatar;
+
+// мини-превью при выборе файла
+document.getElementById('avatarInput').addEventListener('change', function(){
+  const file = this.files[0];
+  if(file){
+    const reader = new FileReader();
+    reader.onload = e => {
+      avatarPreview.src = e.target.result;
+      avatarPreview.style.display = 'block';
+    }
+    reader.readAsDataURL(file);
+  }
+});
+
+// смена аватара
+document.getElementById('changeAvatarBtn').addEventListener('click', () => {
+  const file = document.getElementById('avatarInput').files[0];
+  if(!file){ msg.style.color='red'; msg.textContent='Choose an image'; return; }
+
+  const reader = new FileReader();
+  reader.onload = function(e){
+    const base64 = e.target.result;
+    avatarImg.src = base64;
+    avatarPreview.style.display = 'none';
+    currentUser.avatar = base64;
+
+    let users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+    users = users.map(u=>{
+      if(u.username === currentUser.username && u.email === currentUser.email){
+        u.avatar = base64;
+      }
+      return u;
+    });
+
+    localStorage.setItem(USERS_KEY, JSON.stringify(users));
+    localStorage.setItem(LOGGED_USER_KEY, JSON.stringify(currentUser));
+    msg.style.color='green'; msg.textContent='Avatar updated successfully!';
+    document.getElementById('avatarInput').value='';
+  }
+  reader.readAsDataURL(file);
+});
+
+// смена username
+document.getElementById('changeUsernameBtn').addEventListener('click', () => {
+  const newUsername = document.getElementById('newUsername').value.trim();
+  if(!newUsername){ msg.style.color='red'; msg.textContent='Enter new username'; return; }
+
+  let users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+  if(users.find(u=>u.username===newUsername)){
+    msg.style.color='red'; msg.textContent='Username already taken'; return;
+  }
+
+  users = users.map(u=>{
+    if(u.username === currentUser.username && u.email === currentUser.email){
+      u.username = newUsername;
+      currentUser.username = newUsername;
+    }
+    return u;
+  });
+
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  localStorage.setItem(LOGGED_USER_KEY, JSON.stringify(currentUser));
+  msg.style.color='green'; msg.textContent='Username changed successfully!';
+  document.getElementById('newUsername').value='';
+});
+
+// смена password
+document.getElementById('changePasswordBtn').addEventListener('click', () => {
+  const newPassword = document.getElementById('newPassword').value.trim();
+  if(!newPassword){ msg.style.color='red'; msg.textContent='Enter new password'; return; }
+
+  let users = JSON.parse(localStorage.getItem(USERS_KEY) || '[]');
+  users = users.map(u=>{
+    if(u.username === currentUser.username && u.email === currentUser.email){
+      u.password = newPassword;
+      currentUser.password = newPassword;
+    }
+    return u;
+  });
+
+  localStorage.setItem(USERS_KEY, JSON.stringify(users));
+  localStorage.setItem(LOGGED_USER_KEY, JSON.stringify(currentUser));
+  msg.style.color='green'; msg.textContent='Password changed successfully!';
+  document.getElementById('newPassword').value='';
+});
+
+// кнопка выхода
+document.getElementById('logoutBtn').addEventListener('click', () => {
+  localStorage.removeItem(LOGGED_USER_KEY);
+  window.location.href = 'login.html';
+});
+</script>
+
+</body>
+</html>
